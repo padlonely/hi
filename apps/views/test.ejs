@@ -1,0 +1,31 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Untitled Document</title>
+<link rel="stylesheet" type="text/css" href="/static/css/main.css"
+</head>
+
+<body>
+        <h1>Wellcom EJS teamlate Engine</h1>
+</body>
+</html>
+
+
+else{
+        var data = user_md.getUserByEmail(params.email);
+        if(data){
+            data.then(function(users){
+                var user = users[0];
+
+                var status = helper.compare_password(params.password, user.password);
+                if(!status){
+                    res.render("signin", {data: {error: "Password Wrong"}});
+                }else{
+                    res.redirect("/admin/");
+                }
+            });
+        }else{
+            res.render("signin", {data: {error: "User not exists"}});
+        }
+    }
