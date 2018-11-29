@@ -57,7 +57,7 @@ function updataPost(params){
     if(params){
     var defer = q.defer();
 
-    var query = conn.query('UPDATE posts SET title = ?, content = ?, author = ?, updated_at = ? WHERE id = ?', [params.title, params.content, params.author, new Data(), params.id], function (err, results) {
+    var query = conn.query("UPDATE posts SET title =?, content = ?, author = ?, updated_at = ? WHERE id = ?", [params.title, params.content, params.author, new Date(), params.id],function (err, results) {
     if (err){
         defer.reject(err);
     }else{
@@ -70,9 +70,28 @@ function updataPost(params){
     return false;
 }
 
+function deletePost(id){
+    if(id){
+        var defer = q.defer();
+    
+        var query = conn.query('DELETE FROM posts WHERE id = ?', [id], function(err, results){
+       
+            if (err){
+                defer.reject(err);
+            }else{
+                defer.resolve(results);      
+                 }
+            });
+        
+            return defer.promise;
+        }
+    return false;
+}
+
 module.exports = {
         getAllPosts,
         addPost,
         getPostByID,
-        updataPost
+        updataPost,
+        deletePost
     }

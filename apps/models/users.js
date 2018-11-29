@@ -38,26 +38,29 @@ function getUserByEmail(email){
         }
         return false;
 }
-function getUserByPassword(password){
-    if(password){
+
+function getAllUser(){
+
         var defer = q.defer();
-        var query = conn.query('SELECT * FROM users WHERE ?', {password: password}, function(err, results) {
+        
+        var query = conn.query('SELECT * FROM users ', function(err, users) {
             if (err){
                 defer.reject(err);
     
             }
             else{
-                defer.resolve(results);      
+                defer.resolve(users);      
                  }
             });
     
             return defer.promise;
         }
-        return false;
-}
+
+
+
 
 module.exports = {
     addUser: addUser,
     getUserByEmail:getUserByEmail,
-    getUserByPassword: getUserByPassword
+    getAllUser
 }

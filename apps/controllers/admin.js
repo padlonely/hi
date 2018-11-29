@@ -7,7 +7,7 @@ var post_md = require("../models/posts");
 var helper = require("../helpers/helper");
 
 router.get("/", function(req, res){
-    //res.json({"message": "This is Admin Page"});
+     if(req.session.user){
     var data = post_md.getAllPosts();
     data.then(function(posts){
         var data = {
@@ -18,7 +18,10 @@ router.get("/", function(req, res){
     }).catch(function(err)
     {
         res.render("admin/dashboard", {data: {error: "Get Post is Error"}});
-    })
+    });
+   }else{
+    res.redirect("/admin/signin");
+}
 });
 
 router.get("/signup", function(req, res){
@@ -37,11 +40,9 @@ router.post("/signup", function(req, res){
     }
     
     //inser to DB Hash Pass
-    
     var password = helper.hash_password(user.passwd);
-    var email = helper.hash_email(user.email)
     user = {
-        email: email,
+        email: user.email,
         password: password,
         first_name: user.firstname,
         last_name: user.lastname
@@ -59,8 +60,7 @@ router.post("/signup", function(req, res){
 router.get("/signin", function(req, res){
     res.render("signin", {data:{}});
 });
-
-
+//login
 router.post("/signin", function(req, res){
     var params = req.body;
 
@@ -77,6 +77,8 @@ router.post("/signin", function(req, res){
                     res.render("signin", {data: {error: "Password Wrong"}});
                     
                 } else {
+                    req.session.user = user;
+                    console.log(req.session.user);
                     res.redirect("/admin/");
                 }
             });
@@ -87,10 +89,15 @@ router.post("/signin", function(req, res){
 });
 
 router.get("/post/new", function(req, res){
+    if(req.session.user){
     res.render("admin/post/new", {data: {error: false}});
+    }else{
+    res.redirect("/admin/signin");
+    }
 })
 
 router.post("/post/new", function(req, res){
+    if(req.session.user){
     var params = req.body;
     if(params.title.trim().length == 0){
         var data = {
@@ -112,11 +119,15 @@ router.post("/post/new", function(req, res){
             };
             res.render("admin/post/new",{data: data});
         });
+        
     }
-
+    }else{
+    res.redirect("/admin/signin");
+    };
 });
 
 router.get("/post/edit/:id", function(req, res){
+    if(req.session.user){
     var params = req.params;
     var id = params.id;
 
@@ -142,6 +153,9 @@ router.get("/post/edit/:id", function(req, res){
         };
         res.render("admin/post/edit", {data: data})
     };
+}else{
+    res.redirect("/admin/signin");
+    };
 });
 
 
@@ -161,5 +175,51 @@ router.put("/post/edit", function(req, res){
     }
 
 });
+
+router.delete("/post/delete", function(req, res){
+    var post_id = req.body.id;
+
+    data = post_md.deletePost(post_id);
+
+    if(!data){
+        res.json({status_code: 500});
+    }else{
+        data.then(function(result){
+            res.json({status_code: 200});
+        }).catch(function(err){
+            res.json({status_code: 500});
+        });
+    }
+});
+
+router.get("/post", function(req, res){
+    if(req.session.user){
+    res.redirect("/admin");
+    }else{
+    res.redirect("/admin/signin");
+    };
+})
+
+router.get("/user/user", function(req, res){
+    if(req.session.user){
+    var data = user_md.getAllUser();
+
+    data.then(function(users){
+        var data = {
+            users: users,
+            error: false
+        };
+        res.render("admin/user/user", {data: data});
+    }).catch(function(err){
+        var data = {
+            error: "Could not get user info"
+        };
+        res.redirect("admin/user/user", {data: data});
+    });
+    }else{
+    res.redirect("/admin/signin");
+    };
+});
+
 
 module.exports = router;
